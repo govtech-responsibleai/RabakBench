@@ -1,0 +1,17 @@
+pandas==2.2.3
+tqdm==4.67.1
+openai==1.75.0
+fireworks-ai==0.15.12
+python-dotenv==1.1.0
+azure-ai-contentsafety==1.0.0
+huggingface_hub==0.30.2
+aioboto3==13.4.0
+transformers==4.51.3
+torchvision==0.21.0
+accelerate==1.6.0
+sentencepiece==0.2.0
+protobuf==6.30.2
+google-api-python-client==2.169.0
+scikit-learn==1.6.1
+matplotlib==3.10.0
+seaborn==0.13.2

@@ -1,0 +1,39 @@
+"""
+moderate.py
+"""
+import pandas as pd
+
+from moderators.aws import main as aws_main
+from moderators.azure import main as azure_main
+from moderators.hf_models import main as hf_main
+from moderators.llamaguard import main as llamaguard_main
+from moderators.modelarmor import main as modelarmor_main
+from moderators.openai_moderation import main as openai_main
+from moderators.perspective import main as perspective_main
+
+
+def main():
+    """
+    Run all moderators on the RabakBench dataset and save the results.
+    """
+    
+    for lang in ['en', 'ms', 'ta', 'zh']:
+        df = pd.read_csv(f"data/{lang}/rabakbench_{lang}.csv")
+        
+        # Closed source models
+        aws_main(df, lang)
+        azure_main(df, lang)
+        modelarmor_main(df, lang)
+        openai_main(df, lang)
+        perspective_main(df, lang)
+        
+        # Open source models
+        llamaguard_main(df, lang)
+        hf_main(df, model_name='wildguard', lang=lang, batch_size=32)
+        hf_main(df, model_name='shieldgemma', batch_size=8)
+        hf_main(df, model_name='granite-guardian', batch_size=16)
+        hf_main(df, model_name='duoguard', batch_size=64)
+    
+
+if __name__ == "__main__":
+    main()
