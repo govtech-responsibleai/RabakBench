@@ -162,7 +162,8 @@ MAP_CONFIG = {
     # Open source models
     "duoguard": DUOGUARD_MAP,
     "granite-guardian": GRANITE_GUARDIAN_MAP,
-    "llamaguard": LLAMAGUARD_MAP,
+    "llamaguard3": LLAMAGUARD_MAP,
+    "llamaguard4": LLAMAGUARD_MAP,
     "shieldgemma": SHIELDGEMMA_MAP,
     "wildguard": WILDGUARD_MAP
 }

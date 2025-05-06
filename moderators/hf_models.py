@@ -5,7 +5,9 @@ from tqdm import tqdm
 from transformers import (
     AutoModelForCausalLM,
     AutoModelForSequenceClassification,
-    AutoTokenizer
+    AutoTokenizer,
+    AutoProcessor,
+    Llama4ForConditionalGeneration,
 )
 
 from moderators.format_utils import (
@@ -16,10 +18,14 @@ from moderators.format_utils import (
     build_granite_guardian_prompts,
     parse_granite_guardian_outputs,
     build_duoguard_prompts,
-    parse_duoguard_outputs
+    parse_duoguard_outputs,
+    build_llamaguard4_prompts,
+    parse_llamaguard4_outputs,
 )
 
 MODELS = {
+    "llamaguard3": "meta-llama/Llama-Guard-3-8B", #8b
+    "llamaguard4": "meta-llama/Llama-Guard-4-12B", #12b
     "wildguard": "allenai/wildguard", #7b
     "shieldgemma": "google/shieldgemma-9b", #9b
     "granite-guardian": "ibm-granite/granite-guardian-3.2-5b", #5b
@@ -42,6 +48,14 @@ class HFClassifier:
             )
             self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B")
             self.tokenizer.pad_token = self.tokenizer.eos_token
+            
+        elif model_name == "llamaguard4":
+            self.processor = AutoProcessor.from_pretrained(MODELS[model_name])
+            self.model = Llama4ForConditionalGeneration.from_pretrained(
+                MODELS[model_name],
+                device_map="auto",
+                torch_dtype=torch.bfloat16,
+            )
         
         else:
             self.model = AutoModelForCausalLM.from_pretrained(
@@ -69,6 +83,10 @@ class HFClassifier:
 
         if self.model_name == "duoguard":
             return self._classify_batch_duoguard(batch)
+            
+        elif self.model_name == "llamaguard4":
+            return self._classify_batch_llamaguard4(batch)
+            
         else:
             formatted_prompts = self.build_prompts(batch)
             tokenized_inputs = self.tokenizer(
@@ -93,7 +111,7 @@ class HFClassifier:
             )
             batch_logits = torch.stack(generated_outputs.scores, dim=1)
             
-            outputs = self.parse_outputs(_, batch_logits)
+            outputs = self.parse_outputs(batch_outputs, batch_logits)
     
             return outputs
 
@@ -112,9 +130,30 @@ class HFClassifier:
             # DuoGuard outputs a 12-dimensional vector (one probability per subcategory).
             logits = outputs.logits  # shape: (batch_size, 12)
 
-        # Input batch is passed into parse_output function as placeholder
-        outputs = self.parse_outputs(batch, logits)
+        outputs = self.parse_outputs(None, logits)
             
+        return outputs
+    
+    def _classify_batch_llamaguard4(self, batch: list[str]) -> list[dict]:
+        formatted_prompts = self.build_prompts(batch)
+        inputs = self.processor.apply_chat_template(
+            formatted_prompts,
+            tokenize=True,
+            add_generation_prompt=True,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            return_dict=True,
+        ).to(self.device)
+
+        outputs = self.model.generate(
+            **inputs,
+            max_new_tokens=30,
+            do_sample=False,
+        )
+        response = self.processor.batch_decode(outputs[:, inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+        outputs = self.parse_outputs(response, None)
+        
         return outputs
 
     def build_prompts(self, batch: list[str]) -> list[str]:
@@ -126,6 +165,8 @@ class HFClassifier:
             return build_granite_guardian_prompts(batch, self.tokenizer)
         elif self.model_name == "duoguard":
             return build_duoguard_prompts(batch)
+        elif self.model_name == "llamaguard4":
+            return build_llamaguard4_prompts(batch)
         else:
             raise ValueError(f"Model {self.model_name} not supported")
         
@@ -139,6 +180,8 @@ class HFClassifier:
             return parse_granite_guardian_outputs(batch)
         elif self.model_name == "duoguard":
             return parse_duoguard_outputs(logits)
+        elif self.model_name == "llamaguard4":
+            return parse_llamaguard4_outputs(batch)
         else:
             raise ValueError(f"Model {self.model_name} not supported")
     

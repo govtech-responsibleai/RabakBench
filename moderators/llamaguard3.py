@@ -136,5 +136,5 @@ def main(df, lang='en'):
         df[category] = [result[category] for result in flattened_results]
 
 
-    df.to_csv(f"data/{lang}/rabakbench_{lang}_llamaguard.csv", index=False)
+    df.to_csv(f"data/{lang}/rabakbench_{lang}_llamaguard3.csv", index=False)
  

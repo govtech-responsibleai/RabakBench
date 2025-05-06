@@ -243,3 +243,42 @@ def parse_duoguard_outputs(logits: list[float], threshold: float = 0.5) -> list[
 
     return outputs
 
+# ------------------------------------------------------------------------------
+# LlamaGuard 4 12b utils
+# ------------------------------------------------------------------------------
+
+def build_llamaguard4_prompts(batch: list[str]) -> list[str]:
+    prompts = []
+    for item in batch:
+        prompts.append([
+            {
+            "role": "user",
+            "content": [
+                    {"type": "text", "text": item}
+                ]
+            }
+        ])
+    return prompts
+
+def parse_llamaguard4_outputs(batch: list[str]) -> list[dict]:
+    outputs = []
+    
+    for item in tqdm(batch):
+        # Initialize all safety categories to 0 (safe)
+        labels = {f"S{i}": 0 for i in range(1, 14)} 
+
+        # If response is 'unsafe', parse the categories
+        output_lines = item.strip().split('\n')
+        if output_lines[0].lower() == 'unsafe' and len(output_lines) > 1:
+            # Parse violated categories from second line
+            response_categories = output_lines[1].strip().split(',')
+
+            # Update labels
+            for category in response_categories:
+                category = category.strip()
+                if category in labels:
+                    labels[category] = 1
+                    
+        outputs.append(labels)
+
+    return outputs
