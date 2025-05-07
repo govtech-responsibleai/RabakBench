@@ -50,16 +50,16 @@ def get_mappable_columns(df_true, df_mod, moderator_name):
     
     return df_true[true_categories], df_mod[mod_categories]
     
-    
+import scipy.stats as stats
 def bootstrap_metrics(y_true, y_pred, n_iterations=1000, random_seed=42):
     """Calculate bootstrapped metrics (F1, Recall, Precision) and their standard errors."""
     np.random.seed(random_seed)
     indices = np.arange(len(y_true))
     
     metrics = {
-        'f1': [],
-        'recall': [],
-        'precision': []
+        'F1': [],
+        'R': [],
+        'P': []
     }
     
     for _ in range(n_iterations):
@@ -69,19 +69,32 @@ def bootstrap_metrics(y_true, y_pred, n_iterations=1000, random_seed=42):
         bootstrap_pred = y_pred[bootstrap_indices]
         
         # Calculate metrics for this bootstrap sample
-        metrics['f1'].append(f1_score(bootstrap_true, bootstrap_pred))
-        metrics['recall'].append(recall_score(bootstrap_true, bootstrap_pred))
-        metrics['precision'].append(precision_score(bootstrap_true, bootstrap_pred))
+        metrics['F1'].append(f1_score(bootstrap_true, bootstrap_pred))
+        metrics['R'].append(recall_score(bootstrap_true, bootstrap_pred))
+        metrics['P'].append(precision_score(bootstrap_true, bootstrap_pred))
     
-    # Calculate mean and std for each metric
-    return {
-        'f1_score': np.mean(metrics['f1']),
-        'f1_std': np.std(metrics['f1']),
-        'recall_score': np.mean(metrics['recall']),
-        'recall_std': np.std(metrics['recall']),
-        'precision_score': np.mean(metrics['precision']),
-        'precision_std': np.std(metrics['precision'])
-    }
+        # Calculate mean, std, and 95% CI for each metric
+    results = {}
+    for metric_name in metrics:
+        values = metrics[metric_name]
+        mean_val = np.mean(values)
+        std_val = np.std(values)
+        
+        # Calculate 95% confidence interval using t-distribution
+        # For bootstrap samples, we can use the percentile method or t-distribution
+        # Here we use the t-distribution approach
+        n = len(values)
+        sem = std_val / np.sqrt(n)
+        t_critical = stats.t.ppf(0.975, df=n-1)  # 95% CI (two-tailed)
+        margin_of_error = t_critical * sem
+        
+        # Store results
+        results[f'{metric_name}_score'] = mean_val
+        results[f'{metric_name}_std'] = std_val
+        results[f'{metric_name}_ci_lower'] = mean_val - margin_of_error
+        results[f'{metric_name}_ci_upper'] = mean_val + margin_of_error
+        
+    return results
 
 def map_and_evaluate(lang='en'):
     print(f"Evaluating {lang}...")
@@ -125,7 +138,6 @@ def map_and_evaluate(lang='en'):
         results.append({
             'moderator': moderator,
             **metrics,
-            'samples_evaluated': len(common_rows)
         })
     
     # Create results DataFrame and save
