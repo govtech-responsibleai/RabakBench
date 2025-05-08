@@ -21,15 +21,18 @@ from moderators.format_utils import (
     parse_duoguard_outputs,
     build_llamaguard4_prompts,
     parse_llamaguard4_outputs,
+    build_polyguard_prompts,
+    parse_polyguard_outputs,
 )
 
 MODELS = {
     "llamaguard3": "meta-llama/Llama-Guard-3-8B", #8b
     "llamaguard4": "meta-llama/Llama-Guard-4-12B", #12b
     "wildguard": "allenai/wildguard", #7b
-    "shieldgemma": "google/shieldgemma-9b", #9b
+    "shieldgemma": "google/shieldgemma-9b", #9b, based on Gemma 2
     "granite-guardian": "ibm-granite/granite-guardian-3.2-5b", #5b
-    "duoguard": "DuoGuard/DuoGuard-0.5B" #0.5B
+    "duoguard": "DuoGuard/DuoGuard-0.5B", #0.5b, based on Qwen-0.5B
+    "polyguard": "ToxicityPrompts/PolyGuard-Qwen-Smol", #0.5b, based on Qwen-0.5B
 }
 
 
@@ -99,7 +102,7 @@ class HFClassifier:
             generated_outputs = self.model.generate(
                 **tokenized_inputs,
                 max_new_tokens=128,
-                temperature=0.0,
+                temperature=0.001,
                 top_p=1.0,
                 use_cache=True,
                 pad_token_id=self.tokenizer.eos_token_id,
@@ -165,6 +168,8 @@ class HFClassifier:
             return build_granite_guardian_prompts(batch, self.tokenizer)
         elif self.model_name == "duoguard":
             return build_duoguard_prompts(batch)
+        elif self.model_name == "polyguard":
+            return build_polyguard_prompts(batch, self.tokenizer)
         elif self.model_name == "llamaguard4":
             return build_llamaguard4_prompts(batch)
         else:
@@ -180,6 +185,8 @@ class HFClassifier:
             return parse_granite_guardian_outputs(batch)
         elif self.model_name == "duoguard":
             return parse_duoguard_outputs(logits)
+        elif self.model_name == "polyguard":
+            return parse_polyguard_outputs(batch)
         elif self.model_name == "llamaguard4":
             return parse_llamaguard4_outputs(batch)
         else:

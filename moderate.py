@@ -18,6 +18,7 @@ def main():
     """
     
     for lang in ['en', 'ms', 'ta', 'zh']: 
+        print(f"Running moderators for {lang}...")
         df = pd.read_csv(f"data/{lang}/rabakbench_{lang}.csv")
         
         # Closed source models
@@ -34,6 +35,7 @@ def main():
         hf_main(df, model_name='shieldgemma', lang=lang, batch_size=8)
         hf_main(df, model_name='granite-guardian', lang=lang, batch_size=8)
         hf_main(df, model_name='duoguard', lang=lang, batch_size=64)
+        hf_main(df, model_name='polyguard', lang=lang, batch_size=64)
     
 
 if __name__ == "__main__":

@@ -97,8 +97,8 @@ PERSPECTIVE_MAP = {
 DUOGUARD_MAP = {
     "Violent crimes": ["physical_violence", "level_2_illegal_activities"],
     "Non-violent crimes": ["level_2_illegal_activities"],
-    "Sex-related crimes": ["level_2_not_appropriate_for_all_ages"],
-    "Child sexual exploitation": ["level_2_not_appropriate_for_all_ages"],
+    "Sex-related crimes": ["level_2_not_appropriate_for_all_ages", "level_2_illegal_activities"],
+    "Child sexual exploitation": ["level_2_not_appropriate_for_all_ages", "level_2_illegal_activities"],
     "Specialized advice": [],
     "Privacy": [],
     "Intellectual property": [],
@@ -127,7 +127,7 @@ LLAMAGUARD_MAP = {
   ],
   "S2": ["level_2_illegal_activities"],
   "S3": ["level_2_not_appropriate_for_all_ages", "level_2_illegal_activities"],
-  "S4": ["level_2_not_appropriate_for_all_ages"],
+  "S4": ["level_2_not_appropriate_for_all_ages", "level_2_illegal_activities"],
   "S5": ["insults", "level_1_not_socially_accepted"],
   "S6": [],
   "S7": [],
@@ -164,6 +164,7 @@ MAP_CONFIG = {
     "granite-guardian": GRANITE_GUARDIAN_MAP,
     "llamaguard3": LLAMAGUARD_MAP,
     "llamaguard4": LLAMAGUARD_MAP,
+    "polyguard": LLAMAGUARD_MAP,
     "shieldgemma": SHIELDGEMMA_MAP,
     "wildguard": WILDGUARD_MAP
 }
