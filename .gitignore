@@ -179,3 +179,7 @@ cython_debug/
 # Data files 
 *.csv
 *.json
+*.png
+
+# Leave evaluation results in the repo
+!*evaluation_results_*.csv

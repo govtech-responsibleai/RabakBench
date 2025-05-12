@@ -5,6 +5,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 from sklearn.metrics import f1_score, precision_score, recall_score
 
 from config import RABAKBENCH_CATEGORIES, MAP_CONFIG
@@ -50,7 +51,6 @@ def get_mappable_columns(df_true, df_mod, moderator_name):
     
     return df_true[true_categories], df_mod[mod_categories]
     
-import scipy.stats as stats
 def bootstrap_metrics(y_true, y_pred, n_iterations=1000, random_seed=42):
     """Calculate bootstrapped metrics (F1, Recall, Precision) and their standard errors."""
     np.random.seed(random_seed)

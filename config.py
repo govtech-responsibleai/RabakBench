@@ -109,16 +109,6 @@ DUOGUARD_MAP = {
     "Jailbreak prompts": [],
 }
 
-GRANITE_GUARDIAN_MAP = {
-  "harm": ["insults"],
-  "social_bias": ["level_1_discriminatory"],
-  "profanity": ["insults"],
-  "sexual_content": ["level_2_not_appropriate_for_all_ages"],
-  "unethical_behavior": ["level_1_not_socially_accepted", "level_2_illegal_activities"],
-  "violence": ["physical_violence"],
-  "harm_engagement": ["level_1_not_socially_accepted", "level_2_illegal_activities"]
-}
-
 LLAMAGUARD_MAP = {
   "S1": [
     "level_2_hate_speech",
@@ -161,7 +151,6 @@ MAP_CONFIG = {
     
     # Open source models
     "duoguard": DUOGUARD_MAP,
-    "granite-guardian": GRANITE_GUARDIAN_MAP,
     "llamaguard3": LLAMAGUARD_MAP,
     "llamaguard4": LLAMAGUARD_MAP,
     "polyguard": LLAMAGUARD_MAP,

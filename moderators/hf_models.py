@@ -15,8 +15,6 @@ from moderators.format_utils import (
     parse_wildguard_outputs, 
     build_shieldgemma_prompts, 
     parse_shieldgemma_outputs,
-    build_granite_guardian_prompts,
-    parse_granite_guardian_outputs,
     build_duoguard_prompts,
     parse_duoguard_outputs,
     build_llamaguard4_prompts,
@@ -30,7 +28,6 @@ MODELS = {
     "llamaguard4": "meta-llama/Llama-Guard-4-12B", #12b
     "wildguard": "allenai/wildguard", #7b
     "shieldgemma": "google/shieldgemma-9b", #9b, based on Gemma 2
-    "granite-guardian": "ibm-granite/granite-guardian-3.2-5b", #5b
     "duoguard": "DuoGuard/DuoGuard-0.5B", #0.5b, based on Qwen-0.5B
     "polyguard": "ToxicityPrompts/PolyGuard-Qwen-Smol", #0.5b, based on Qwen-0.5B
 }
@@ -164,8 +161,6 @@ class HFClassifier:
             return build_wildguard_prompts(batch)
         elif self.model_name == "shieldgemma":
             return build_shieldgemma_prompts(batch)
-        elif self.model_name == "granite-guardian":
-            return build_granite_guardian_prompts(batch, self.tokenizer)
         elif self.model_name == "duoguard":
             return build_duoguard_prompts(batch)
         elif self.model_name == "polyguard":
@@ -181,8 +176,6 @@ class HFClassifier:
             return parse_wildguard_outputs(batch)
         elif self.model_name == "shieldgemma":
             return parse_shieldgemma_outputs(batch, logits, self.tokenizer)
-        elif self.model_name == "granite-guardian":
-            return parse_granite_guardian_outputs(batch)
         elif self.model_name == "duoguard":
             return parse_duoguard_outputs(logits)
         elif self.model_name == "polyguard":

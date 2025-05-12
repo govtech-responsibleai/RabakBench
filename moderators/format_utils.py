@@ -3,7 +3,6 @@ import re
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer
-from tqdm import tqdm
 
 # ------------------------------------------------------------------------------
 # WildGuard utils
@@ -122,9 +121,7 @@ def parse_shieldgemma_outputs(batch: list[str], logits: torch.Tensor, tokenizer:
     vocab = tokenizer.get_vocab()
     
     # Split batch up into multiples of len(SHIELDGEMMA_RISKS)
-    for batch_start in tqdm(
-        range(0, len(batch), len(SHIELDGEMMA_RISKS)), total=len(batch) // len(SHIELDGEMMA_RISKS)
-    ):
+    for batch_start in range(0, len(batch), len(SHIELDGEMMA_RISKS)):
         safety_output = {}
         for i in range(len(SHIELDGEMMA_RISKS)):
             # Extract risk name from the policy string using regex
@@ -140,74 +137,11 @@ def parse_shieldgemma_outputs(batch: list[str], logits: torch.Tensor, tokenizer:
             
             safety_output[risk_key] = score > threshold
             safety_output[f"{risk_key}_score"] = score
-        print(safety_output)
+            
         outputs.append(safety_output)
 
     return outputs
 
-    
-# ------------------------------------------------------------------------------
-# Granite Guardian utils
-# ------------------------------------------------------------------------------
-
-GRANITE_GUARDIAN_RISKS = [
-    "harm", 
-    "social_bias", 
-    "profanity", 
-    "sexual_content",
-    "unethical_behavior",
-    "violence", 
-    "harm_engagement", 
-    # "evasiveness"
-    # "jailbreak", 
-]
-
-def build_granite_guardian_prompts(batch: list[str], tokenizer: AutoTokenizer) -> list[str]:
-    prompts = []
-    for item in batch:
-        # Add one prompt per risk
-        for risk in GRANITE_GUARDIAN_RISKS:
-            chat = tokenizer.apply_chat_template(
-                conversation=[{"role": "user", "content": item}], 
-                guardian_config = {"risk_name": risk}, 
-                tokenize=False, 
-                add_generation_prompt=True
-            )
-            prompts.append(chat)
-    return prompts
-
-def parse_granite_guardian_outputs(batch: list[str]) -> list[dict]:
-    safe_token = "No"
-    risky_token = "Yes"
-    
-    outputs = []
-    # Split batch up into multiples of len(SHIELDGEMMA_RISKS). Take max score across all risks.
-    for batch_start in tqdm(
-        range(0, len(batch), len(GRANITE_GUARDIAN_RISKS)), total=len(batch) // len(GRANITE_GUARDIAN_RISKS)
-    ):
-        safety_output = {}
-        for i, risk in enumerate(GRANITE_GUARDIAN_RISKS): 
-            res = re.search(r"assistant(\w+)", batch[batch_start + i], re.MULTILINE).group(1).strip()
-            if risky_token.lower() == res.lower():
-                label = True
-            elif safe_token.lower() == res.lower():
-                label = False
-            else:
-                label = None
-    
-            try:
-                confidence_level = re.search(r'<confidence> (.*?) </confidence>', batch[batch_start + i]).group(1).strip()
-            except:
-                confidence_level = None
-                
-            safety_output[risk] = label
-            safety_output[f"{risk}_confidence"] = confidence_level
-                
-        outputs.append(safety_output)
-        
-    return outputs
-    
-    
 # ------------------------------------------------------------------------------
 # DuoGuard utils
 # ------------------------------------------------------------------------------
@@ -263,7 +197,7 @@ def build_llamaguard4_prompts(batch: list[str]) -> list[str]:
 def parse_llamaguard4_outputs(batch: list[str]) -> list[dict]:
     outputs = []
     
-    for item in tqdm(batch):
+    for item in batch:
         # Initialize all safety categories to 0 (safe)
         labels = {f"S{i}": 0 for i in range(1, 14)} 
 
