@@ -142,7 +142,7 @@ def map_and_evaluate(lang='en'):
     
     # Create results DataFrame and save
     results_df = pd.DataFrame(results)
-    results_df.to_csv(f'evaluation_results_{lang}.csv', index=False)
+    results_df.to_csv(f'results/evaluation_results_{lang}.csv', index=False)
     print("\nEvaluation Results:")
     print(results_df.to_string(index=False))
     
