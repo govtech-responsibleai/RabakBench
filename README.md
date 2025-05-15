@@ -4,6 +4,9 @@ RabakBench is a multilingual safety benchmark designed for Singapore's linguisti
 
 By releasing RabakBench, we aim to advance the study of AI safety in low-resource languages by enabling robust safety evaluation in multilingual settings and providing a reproducible framework for building localized safety datasets.
 
+> [!TIP]
+> Explore the dataset through this [Jupyter Notebook](dataset_eda.ipynb)
+
 ## Dataset Construction
 
 RabakBench comprises over 5,000 examples across six harm categories with severity levels. The dataset was constructed through a scalable three-stage pipeline:
@@ -28,8 +31,8 @@ pip install -r requirements.txt
 
 Due to sensitive content, access to the dataset is provided through a gated process:
 
-- For reviewers: Private access is granted via Kaggle.
-- For researchers: We plan to support controlled access in the future with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety.
+- For reviewers: Private access is granted via Kaggle. Please refer to the OpenReview submission for the link
+- For researchers: We plan to support controlled access in the future with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety. Further details will be made available soon.
 
 Download the 4 datasets and place them in the appropriate folders under the `/data` directory:
 
