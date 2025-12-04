@@ -11,9 +11,9 @@ from transformers import (
 )
 
 from moderators.format_utils import (
-    build_wildguard_prompts, 
-    parse_wildguard_outputs, 
-    build_shieldgemma_prompts, 
+    build_wildguard_prompts,
+    parse_wildguard_outputs,
+    build_shieldgemma_prompts,
     parse_shieldgemma_outputs,
     build_duoguard_prompts,
     parse_duoguard_outputs,

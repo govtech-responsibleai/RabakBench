@@ -267,7 +267,7 @@ def parse_polyguard_outputs(batch: list[str]) -> list[dict]:
     outputs = []
     for item in batch:
         # Initialize all safety categories to 0 (safe)
-        labels = {f"S{i}": 0 for i in range(1, 14)} 
+        labels = {f"S{i}": 0 for i in range(1, 14)}
         for x in item.split('assistant')[-1].split("\n"):
             try:
                 if (x == ['']) or (':' not in x):
@@ -281,9 +281,9 @@ def parse_polyguard_outputs(batch: list[str]) -> list[dict]:
                         if cat in labels:
                             labels[cat] = 1
                     break
-                
+
             except:
                 print("Error ", x)
-            
+
         outputs.append(labels)
     return outputs

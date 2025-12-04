@@ -5,11 +5,13 @@ import pandas as pd
 
 from moderators.aws import main as aws_main
 from moderators.azure import main as azure_main
+from moderators.gpt_oss import main as gptoss_main
 from moderators.hf_models import main as hf_main
 from moderators.llamaguard3 import main as llamaguard_main
 from moderators.modelarmor import main as modelarmor_main
 from moderators.openai_moderation import main as openai_main
 from moderators.perspective import main as perspective_main
+from moderators.qwen3guard import main as qwen3guard_main
 
 
 def main():
@@ -30,6 +32,8 @@ def main():
         
         # Open source models
         llamaguard_main(df, lang)
+        qwen3guard_main(df, lang)
+        gptoss_main(df, lang)
         hf_main(df, model_name='llamaguard4', lang=lang, batch_size=8)
         hf_main(df, model_name='wildguard', lang=lang, batch_size=32)
         hf_main(df, model_name='shieldgemma', lang=lang, batch_size=8)
