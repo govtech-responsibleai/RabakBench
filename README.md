@@ -1,6 +1,6 @@
-# RabakBench: Scaling Human Annotations to Construct Localized Multilingual Safety Benchmarks for Low-Resource Languages
+# RabakBench: A Localized Multilingual Safety Benchmark
 
-RabakBench is a multilingual safety benchmark designed for Singapore's linguistic content. It supports evaluation of popular open-source and closed-source content moderation systems in low-resource and culturally diverse languages, covering Singlish (an English-based creole) and local variants of Chinese, Malay, and Tamil. These languages are often underrepresented in existing benchmarks, posing challenges for large language models (LLMs) and their safety classifiers.
+RabakBench supports evaluation of popular open-source and closed-source content moderation systems in low-resource and culturally diverse languages. This dataset covers Singlish (an English-based creole) and local variants of Chinese, Malay, and Tamil. These languages are often underrepresented in existing benchmarks, posing challenges for large language models (LLMs) and their safety classifiers.
 
 By releasing RabakBench, we aim to advance the study of AI safety in low-resource languages by enabling robust safety evaluation in multilingual settings and providing a reproducible framework for building localized safety datasets.
 
@@ -31,14 +31,14 @@ pip install -r requirements.txt
 
 Due to sensitive content, access to the dataset is provided through a gated process:
 
-- For reviewers: Private access is granted via Kaggle. Please refer to the OpenReview submission for the link
-- For researchers: We plan to support controlled access in the future with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety. Further details will be made available soon.
+- For select reviewers: Private access to the full dataset is granted.
+- For researchers: We support controlled access with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety. Access the public set [here](https://huggingface.co/datasets/govtech/RabakBench).
 
 Download the 4 datasets and place them in the appropriate folders under the `/data` directory:
 
 - `rabakbench_en.csv → /data/en/rabakbench_en.csv`
 - `rabakbench_ms.csv → /data/ms/rabakbench_ms.csv`
-- `rabakbench_ta.csv → /data/ta/abakbench_ta.csv`
+- `rabakbench_ta.csv → /data/ta/rabakbench_ta.csv`
 - `rabakbench_zh.csv → /data/zh/rabakbench_zh.csv`
 
 ### 3. Configure API keys
@@ -66,6 +66,9 @@ export PERSPECTIVE_API_KEY=XXXXXXXXXX
 
 # Fireworks API (For LlamaGuard and select open-sourced models)
 export FIREWORKS_API_KEY=XXXXXXXXXX
+
+# HuggingFace Token (For GPT-OSS-SafeAguard via Groq provider)
+export HF_TOKEN=XXXXXXXXXX
 ```
 
 ### 4. Hugging Face Authentication (for open-source models)
@@ -77,6 +80,17 @@ huggingface-cli login
 ```
 
 Make sure you have an access token from https://huggingface.co/settings/tokens.
+
+### 5. Set up Qwen3Guard vLLM server (optional)
+
+To run Qwen3Guard-Gen 8B, start a local vLLM server:
+
+```bash
+pip install vllm
+vllm serve Qwen/Qwen3Guard-Gen-8B --port 8000
+```
+
+The server exposes an OpenAI-compatible API endpoint that the moderator will connect to.
 
 ## Evaluation
 
@@ -94,23 +108,25 @@ python evaluate.py
 
 ## Results
 
-Evaluations of 11 prominent open-source and closed-source guardrail classifiers revealed significant performance degradation on this localized, multilingual benchmark. More details on the evaluation setup can be found in our paper.
+Evaluations of 13 prominent open-source and closed-source guardrail classifiers revealed significant performance degradation on this localized, multilingual benchmark. More details on the evaluation setup can be found in our paper.
 
 Refer to ./dataset_eda.ipynb and the ./results folder for the full set of evaluation metrics, per-language scores, and error breakdowns.
 
 | Guardrail                | Singlish | Chinese | Malay | Tamil | Average |
 | :----------------------- | :------: | :-----: | :---: | :---: | :-----: |
-| AWS Bedrock Guardrail    |  66.50   |  0.06   | 17.47 | 0.06  |  21.28  |
-| Azure AI Content Safety  |  66.70   |  73.62  | 66.18 | 53.86 |  65.09  |
-| Google Cloud Model Armor |  62.37   |  67.95  | 71.26 | 73.56 |  68.78  |
-| OpenAI Moderation        |  66.00   |  68.20  | 59.00 | 0.69  |  50.01  |
-| Perspective API          |  37.80   |  50.46  | 18.60 | 0.10  |  26.97  |
-| DuoGuard 0.5B            |  42.28   |  58.15  | 31.70 | 43.55 |  43.92  |
-| LlamaGuard 3 8B          |  54.76   |  53.05  | 47.05 | 46.84 |  50.42  |
-| LlamaGuard 4 12B         |  60.53   |  54.20  | 62.36 | 73.77 |  62.72  |
-| PolyGuard 0.5B           |  67.51   |  75.70  | 58.00 | 21.27 |  55.62  |
-| ShieldGemma 9B           |  41.37   |  31.85  | 29.23 | 22.78 |  31.31  |
-| WildGuard 7B             |  78.89   |  68.82  | 35.77 | 0.23  |  44.45  |
+| AWS Bedrock Guardrail    |  66.50   |  0.59   | 18.49 | 0.57  |  21.54  |
+| Azure AI Content Safety  |  66.70   |  73.62  | 70.75 | 53.86 |  66.23  |
+| Google Cloud Model Armor |  62.37   |  67.95  | 74.30 | 73.56 |  69.54  |
+| OpenAI Moderation        |  66.00   |  68.20  | 63.18 | 6.86  |  51.06  |
+| Perspective API          |  37.80   |  50.46  | 24.32 | 1.03  |  28.40  |
+| DuoGuard 0.5B            |  42.28   |  58.15  | 36.15 | 43.54 |  45.03  |
+| LlamaGuard 3 8B          |  54.76   |  53.05  | 52.81 | 46.84 |  51.86  |
+| LlamaGuard 4 12B         |  60.53   |  54.20  | 65.92 | 73.77 |  63.60  |
+| PolyGuard 0.5B           |  67.51   |  75.70  | 63.07 | 21.27 |  56.89  |
+| ShieldGemma 9B           |  41.37   |  31.85  | 29.61 | 22.78 |  31.40  |
+| WildGuard 7B             |  78.89   |  68.82  | 39.04 | 2.32  |  47.27  |
+| Qwen3Guard-Gen 8B        |  79.04   |  82.47  | 84.28 | 83.26 |  82.26  |
+| gpt-oss-safeguard-20b    |  81.73   |  86.64  | 81.57 | 76.67 |  81.65  |
 
 ## Citations
 

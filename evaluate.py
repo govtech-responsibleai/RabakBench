@@ -10,25 +10,76 @@ from sklearn.metrics import f1_score, precision_score, recall_score
 
 from config import RABAKBENCH_CATEGORIES, MAP_CONFIG
 
-def remap_azure(df_mod):
+def normalize_label(label, threshold=0.5):
     """
-    For special cases such as Azure where non_zero labels do not indicate "Unsafe" behaviour.
-    Assign a negative score to such cases. For e.g., Hate level 1 does not indicate unsafe behaviour.
+    Normalize different label formats (boolean/binary/ordinal/string severity)
+    to binary (0.0/1.0) as float.
+
+    Handles:
+    - Binary: 0, 1
+    - Ordinal: any integer (0 = False, >0 = True)
+    - String severity: "Safe" = 0, "Unsafe"/"Controversial" = 1
+    - Boolean: True/False
     """
-    for k, v in MAP_CONFIG['azure'].items():
-        for severity, cat in v.items():
-            if len(cat) == 0:
-                df_mod.loc[df_mod[k] == int(severity), k] = 0
+    try:
+        # Convert to float first
+        value = float(label)
+
+        # Check if it's binary (0 or 1)
+        if value in [0, 1]:
+            return float(value)
+
+        # Check if it's ordinal (0 for False, any other number for True)
+        if value.is_integer():
+            return 1.0 if value > 0 else 0.0
+
+        # If it's a float probability, apply threshold
+        return 1.0 if value > threshold else 0.0
+
+    except (ValueError, TypeError):
+        # Handle boolean or string values
+        if isinstance(label, bool):
+            return 1.0 if label else 0.0
+        if isinstance(label, str):
+            # Handle severity level strings (Qwen3Guard, etc.)
+            return 1.0 if label.lower() in ["true", "yes", "1", "unsafe", "controversial"] else 0.0
+
+        # If we can't handle it, return 0
+        return 0.0
+
+def remap_severity_levels(df_mod, moderator_name):
+    """
+    For moderators with severity levels (Azure, Qwen3Guard) where non-zero labels
+    do not necessarily indicate "Unsafe" behaviour.
+    Set columns to 0 if ALL severity levels map to empty categories.
+    """
+    for k, v in MAP_CONFIG[moderator_name].items():
+        # Check if all severity levels map to empty lists
+        all_empty = all(len(cat) == 0 for cat in v.values())
+
+        if all_empty:
+            # If no severity level maps to any category, set entire column to 0
+            df_mod[k] = 0
+        else:
+            # Otherwise, set to 0 only for specific severity levels that map to empty
+            for severity, cat in v.items():
+                if len(cat) == 0:
+                    if moderator_name == 'azure':
+                        df_mod.loc[df_mod[k] == int(severity), k] = 0
+                    else:
+                        df_mod.loc[df_mod[k] == severity, k] = 0
+
     return df_mod
 
 def get_mappable_columns(df_true, df_mod, moderator_name):
     """Remove categories that are not relevant from both dataframes."""
     map_config = MAP_CONFIG[moderator_name]
-    
+
     true_subcategories = set()
     mod_categories = set()
     for k, v in map_config.items():
-        if moderator_name == 'azure':
+        # Handle moderators with severity levels (Azure, Qwen3Guard)
+        if moderator_name in ['azure', 'qwen3guard']:
             cat_len = 0
             for _, v1 in v.items():
                 true_subcategories.update(v1)
@@ -112,8 +163,9 @@ def map_and_evaluate(lang='en'):
         print(f"===> {moderator}...")
         try:
             df_mod = pd.read_csv(f'data/{lang}/rabakbench_{lang}_{moderator}.csv')
-            if moderator == 'azure':
-                df_mod = remap_azure(df_mod)
+            # Remap moderators with severity levels
+            if moderator in ['azure', 'qwen3guard']:
+                df_mod = remap_severity_levels(df_mod, moderator)
         except FileNotFoundError:
             print(f"File not found: data/{lang}/rabakbench_{lang}_{moderator}.csv")
             continue
@@ -130,8 +182,12 @@ def map_and_evaluate(lang='en'):
         
         # Calculate binary labels
         df_true_common, df_mod_common = get_mappable_columns(df_true_common, df_mod_common, moderator)
+
+        # Normalize labels (handles string severity levels like "Unsafe", "Controversial", "Safe")
+        df_mod_normalized = df_mod_common.map(normalize_label)
+
         y_true = df_true_common.astype(int).astype(bool).max(axis=1)
-        y_pred = df_mod_common.astype(int).astype(bool).max(axis=1)
+        y_pred = df_mod_normalized.astype(int).astype(bool).max(axis=1)
         
         # Get all metrics in one go, using a different seed for each moderator
         metrics = bootstrap_metrics(y_true, y_pred)

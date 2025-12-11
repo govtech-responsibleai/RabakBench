@@ -140,6 +140,102 @@ WILDGUARD_MAP = {
   "prompt_harmfulness": []
 }
 
+GPTOSS_MAP = {
+  "level_1_discriminatory": ["level_1_discriminatory"],
+  "level_2_hate_speech": ["level_2_hate_speech"],
+  "insults": ["insults"],
+  "level_1_not_appropriate_for_minors": ["level_1_not_appropriate_for_minors"],
+  "level_2_not_appropriate_for_all_ages": ["level_2_not_appropriate_for_all_ages"],
+  "physical_violence": ["physical_violence"],
+  "level_1_self_harm_intent": ["level_1_self_harm_intent"],
+  "level_2_self_harm_action": ["level_2_self_harm_action"],
+  "level_1_not_socially_accepted": ["level_1_not_socially_accepted"],
+  "level_2_illegal_activities": ["level_2_illegal_activities"]
+}
+
+
+QWEN3GUARD_MAP = {
+    "Violent": {
+        "Unsafe": [
+            "physical_violence",
+            "level_2_illegal_activities"
+        ],
+        "Controversial": [
+            "physical_violence",
+            "level_2_illegal_activities"
+        ],
+        "Safe": []
+    },
+
+    "Non-violent Illegal Acts": {
+        "Unsafe": [
+            "level_2_illegal_activities"
+        ],
+        "Controversial": [
+            "level_2_illegal_activities"
+        ],
+        "Safe": []
+    },
+
+    "Sexual Content or Sexual Acts": {
+        "Unsafe": [
+            "level_2_not_appropriate_for_all_ages"
+        ],
+        "Controversial": [
+            "level_1_not_appropriate_for_minors"
+        ],
+        "Safe": []
+    },
+
+    "PII": {
+        "Unsafe": [],
+        "Controversial": [],
+        "Safe": []
+    },
+
+    "Suicide & Self-Harm": {
+        "Unsafe": [
+            "level_1_self_harm_intent",
+            "level_2_self_harm_action"
+        ],
+        "Controversial": [
+            "level_1_self_harm_intent"
+        ],
+        "Safe": []
+    },
+
+    "Unethical Acts": {
+        "Unsafe": [
+            "level_1_discriminatory",
+            "insults",
+            "level_1_not_socially_accepted"
+        ],
+        "Controversial": [
+            "insults",
+            "level_1_not_socially_accepted"
+        ],
+        "Safe": []
+    },
+
+    "Politically Sensitive Topics": {
+        "Unsafe": [],
+        "Controversial": [],
+        "Safe": []
+    },
+
+    "Copyright Violation": {
+        "Unsafe": [],
+        "Controversial": [],
+        "Safe": []
+    },
+
+    "Jailbreak": {
+        "Unsafe": [],
+        "Controversial": [],
+        "Safe": []
+    }
+}
+
 
 MAP_CONFIG = {
     # Closed source models
@@ -148,12 +244,14 @@ MAP_CONFIG = {
     "modelarmor": MODELARMOR_MAP,
     "openai": OPENAI_MODERATION_MAP,
     "perspective": PERSPECTIVE_MAP,
-    
+
     # Open source models
     "duoguard": DUOGUARD_MAP,
     "llamaguard3": LLAMAGUARD_MAP,
     "llamaguard4": LLAMAGUARD_MAP,
     "polyguard": LLAMAGUARD_MAP,
     "shieldgemma": SHIELDGEMMA_MAP,
-    "wildguard": WILDGUARD_MAP
+    "wildguard": WILDGUARD_MAP,
+    "gptoss": GPTOSS_MAP,
+    "qwen3guard": QWEN3GUARD_MAP
 }
