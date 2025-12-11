@@ -29,12 +29,10 @@ pip install -r requirements.txt
 
 ### 2. Download datasets
 
-Due to sensitive content, access to the dataset is provided through a gated process:
+We support controlled access with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety. 
+Access to the full dataset is not provided to the public, instead, access the public set [here](https://huggingface.co/datasets/govtech/RabakBench).
 
-- For select reviewers: Private access to the full dataset is granted.
-- For researchers: We support controlled access with terms of use and intent verification, to ensure responsible usage aligned with our goals of improving multilingual AI safety. Access the public set [here](https://huggingface.co/datasets/govtech/RabakBench).
-
-Download the 4 datasets and place them in the appropriate folders under the `/data` directory:
+Place the 4 datasets in the appropriate folders under the `/data` directory:
 
 - `rabakbench_en.csv → /data/en/rabakbench_en.csv`
 - `rabakbench_ms.csv → /data/ms/rabakbench_ms.csv`
@@ -81,9 +79,9 @@ huggingface-cli login
 
 Make sure you have an access token from https://huggingface.co/settings/tokens.
 
-### 5. Set up Qwen3Guard vLLM server (optional)
+### 5. vLLM server (optional)
 
-To run Qwen3Guard-Gen 8B, start a local vLLM server:
+To run some open-source models locally (e.g. Qwen3Guard-Gen 8B), start a local vLLM server:
 
 ```bash
 pip install vllm
